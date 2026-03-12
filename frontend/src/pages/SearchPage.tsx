@@ -2,18 +2,40 @@ import { useState } from "react"
 import { buscarCartas } from "../services/cards.service"
 //jsx element component
 import PokemonCard from "../components/PokemonCard"
+import useCollection from "../hooks/useCollection"
 
 export default function SearchPage() {
 
+
   const [name, setName] = useState("")
   const [cartas, setCartas] = useState<any[]>([])
+  const [loading, setLoading] = useState(false)
+  const { addCard } = useCollection()
 
   async function handleSearch() {
 
-    const resultado = await buscarCartas(name)
+    if (!name.trim()) return
 
-    setCartas(resultado)
+    try {
+
+      setLoading(true)
+
+      const resultado = await buscarCartas(name)
+
+      setCartas(resultado)
+
+    } catch (error) {
+
+      console.error("Erro ao buscar cartas", error)
+
+    } finally {
+
+      setLoading(false)
+
+    }
   }
+
+
 
   return (
     <div>
@@ -40,6 +62,8 @@ export default function SearchPage() {
     
     </div>
 
+    {loading && <p>Buscando cartas...</p>}
+
       <div className="grid">
 
         {cartas.map((carta) => (
@@ -47,6 +71,7 @@ export default function SearchPage() {
                 key={carta.id}
                 name={carta.name}
                 image={carta.image}
+                onAdd={() => addCard(carta)}
             />
         ))}
 
