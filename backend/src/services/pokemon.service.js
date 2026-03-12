@@ -13,11 +13,14 @@ export async function procurarCartas(name) {
 
         const cartasValidas = cartas
             .filter(carta => carta.image)
-            .slice(0,20)
+            // limitar 30 cartas
+            .slice(0,30)
+            //pegar o que vai aparecer
             .map(carta => ({
                 id:carta.id,
                 localId:carta.localId,
                 name:carta.name,
+            // high.png para aparecer a imagem pode ser low.png
                 image: `${carta.image}/high.png`
 
             }));
@@ -33,4 +36,26 @@ export async function procurarCartas(name) {
         console.error("Erro no Service:", error);
         throw error;
     }
+}
+
+
+export async function buscarCartaPorId(id) {
+
+        const response = await fetch(
+            `${API_URL}?name=${encodeURIComponent(name)}`
+        );
+        if (!response.ok) {
+        throw new Error(`Carta não encontrada: ${response.status}`);
+        }
+        
+        
+        const carta = await response.json();
+
+        return {
+            id: carta.id,
+            localId: carta.localId,
+            name: carta.name,
+            image: `${carta.image}/high.png`
+        };
+
 }
