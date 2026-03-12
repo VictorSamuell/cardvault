@@ -11,7 +11,19 @@ export async function procurarCartas(name) {
         }
         const cartas = await response.json();
 
-        const cartasValidas = cartas.filter(carta => carta.image);
+        const cartasValidas = cartas
+            .filter(carta => carta.image)
+            .slice(0,20)
+            .map(carta => ({
+                id:carta.id,
+                localId:carta.localId,
+                name:carta.name,
+                image: `${carta.image}/high.png`
+
+            }));
+
+
+
 
         console.log(`Sucesso! ${cartasValidas.length} cartas encontradas.`);
 
