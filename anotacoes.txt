@@ -1,0 +1,7 @@
+ligar o backend: 
+na pasta backend/
+npm run dev
+
+ligar o frontend:
+na pasta frontend/
+npm run dev
