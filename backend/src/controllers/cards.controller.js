@@ -1,4 +1,4 @@
-import { procurarCartas } from "../services/pokemon.service.js"
+import { procurarCartas , buscarCartaPorId } from "../services/pokemon.service.js"
 
 export async function getCartas(req, res) {
 
@@ -23,6 +23,26 @@ export async function getCartas(req, res) {
         res.status(500).json({
             error: "Falha no Fetch: cartas"
         })
+    }
+
+}
+
+export async function getCartaPorId(req, res) {
+
+    const { id } = req.params
+
+    try {
+        const carta = await buscarCartaPorId(id)
+        res.json(carta);
+
+    } catch(error){
+
+        console.error("Erro Real msm dificil", error)
+
+        res.status(500).json({
+            error: "FALHA NA BUSCA QUERIDAO"
+        })
+
     }
 
 }

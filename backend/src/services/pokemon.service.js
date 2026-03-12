@@ -41,8 +41,10 @@ export async function procurarCartas(name) {
 
 export async function buscarCartaPorId(id) {
 
+    //http://localhost:3000/api/cartas/?name=charizard       exemplo 
+
         const response = await fetch(
-            `${API_URL}?name=${encodeURIComponent(name)}`
+            `${API_URL}/${encodeURIComponent(id)}`
         );
         if (!response.ok) {
         throw new Error(`Carta não encontrada: ${response.status}`);
