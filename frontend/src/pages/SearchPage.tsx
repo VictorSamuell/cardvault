@@ -18,17 +18,27 @@ export default function SearchPage() {
   return (
     <div>
 
+    <div className="SearchForm">
+
       <h1>CardVault</h1>
 
-      <input
+
+    
+    <input
+        className="SearchInput"
         value={name}
         onChange={(e) => setName(e.target.value)}
-        placeholder="Buscar Pokémon"
+        placeholder="Digite o nome de um Pokémon"
       />
+    
 
-      <button onClick={handleSearch}>
+
+
+      <button className="SearchButton" onClick={handleSearch}>
         Buscar
       </button>
+    
+    </div>
 
       <div className="grid">
 

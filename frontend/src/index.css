@@ -1,28 +1,41 @@
 body {
-  font-family: Arial, sans-serif;
-  background: #0f172a;
-  color: white;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #68acf0; 
+  color: #334155; 
   margin: 0;
 }
 
 h1 {
   text-align: center;
+  color: #fcfcfc; 
+}
+
+.SearchForm {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  margin-top: 40px;
+  margin-bottom: 40px;
 }
 
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, 200px);
-  gap: 20px;
+  gap: 24px;
   justify-content: center;
   margin-top: 20px;
+  padding: 0 20px; 
 }
 
+
 .card {
-  background: #1e293b;
-  padding: 10px;
-  border-radius: 10px;
+  background: #eae8ff; 
+  border-radius: 12px;
   text-align: center;
-  transition: transform 0.2s;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); 
 }
 
 .card img {
@@ -31,5 +44,83 @@ h1 {
 }
 
 .card:hover {
-  transform: scale(1.05);
+  transform: translateY(-5px); 
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+
+.SearchInput {
+  width: 100%;
+  max-width: 250px;
+  padding: 0.875rem 1rem;
+  font-size: 1rem;
+  background: #ffffff;
+  border: 1px solid #e2e8f0; /* Borda cinza bem sutil */
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  outline: none;
+  transition: all 0.25s ease;
+  color: #334155;
+}
+
+.SearchInput::placeholder {
+  color: #94a3b8;
+}
+
+.SearchInput:focus {
+  border-color: #0e2c55; /* Azul limpo quando clica */
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); /* "Aura" azul em volta */
+}
+
+/* --- ESTILO DO BOTÃO --- */
+.SearchButton {
+  position: relative;
+  display: inline-block;
+  padding: 12px 28px;
+  border: none;
+  font-size: 16px;
+  background-color: #ffffff;
+  border-radius: 100px;
+  font-weight: 600;
+  color: #334155; /* Texto azul */
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.SearchButton span:last-child {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 20px;
+  height: 20px;
+  background-color: #3b82f6; /* Fundo azul que expande */
+  border-radius: 50%;
+  opacity: 0;
+  transition: all 0.5s ease;
+}
+
+.SearchButton span:first-child {
+  position: relative;
+  z-index: 1;
+}
+
+.SearchButton:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  color: #ffffff;
+  border-color: #3b82f6;
+  color: #3b82f6;
+}
+
+.SearchButton:active {
+  transform: scale(0.97);
+}
+
+.SearchButton:hover span:last-child {
+  width: 200px;
+  height: 200px;
+  opacity: 1;
 }
