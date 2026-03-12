@@ -1,5 +1,7 @@
 import { useState } from "react"
 import { buscarCartas } from "../services/cards.service"
+//jsx element component
+import PokemonCard from "../components/PokemonCard"
 
 export default function SearchPage() {
 
@@ -28,16 +30,17 @@ export default function SearchPage() {
         Buscar
       </button>
 
-      <div>
+      <div className="grid">
 
         {cartas.map((carta) => (
-          <div key={carta.id}>
-            <h3>{carta.name}</h3>
-            <img src={carta.image} width="200"/>
-          </div>
+            <PokemonCard
+                key={carta.id}
+                name={carta.name}
+                image={carta.image}
+            />
         ))}
 
-      </div>
+</div>
 
     </div>
   )
