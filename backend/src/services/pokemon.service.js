@@ -2,6 +2,7 @@ const API_URL = "https://api.tcgdex.net/v2/pt/cards";
 
 export async function procurarCartas(name) {
     try {
+
         const response = await fetch(
             `${API_URL}?name=${encodeURIComponent(name)}`
         );
@@ -9,55 +10,73 @@ export async function procurarCartas(name) {
         if (!response.ok) {
             throw new Error(`Erro na API: Status ${response.status}`);
         }
+
         const cartas = await response.json();
 
-        const cartasValidas = cartas
+        // filtrar cartas com imagem e limitar resultados
+        const cartasFiltradas = cartas
             .filter(carta => carta.image)
-            // limitar 30 cartas
-            .slice(0,30)
-            //pegar o que vai aparecer
-            .map(carta => ({
-                id:carta.id,
-                localId:carta.localId,
-                name:carta.name,
-            // high.png para aparecer a imagem pode ser low.png
-                image: `${carta.image}/high.png`
+            .slice(0,20);
 
-            }));
+        // buscar preço de cada carta
+        const cartasValidas = await Promise.all(
+            cartasFiltradas.map(async (carta) => {
 
+                const detalheResponse = await fetch(
+                    `${API_URL}/${carta.id}`
+                );
 
+                const detalhe = await detalheResponse.json();
 
+                return {
+                    id: carta.id,
+                    localId: carta.localId,
+                    name: carta.name,
+                    image: `${carta.image}/high.png`,
+                    price:
+                        detalhe.pricing?.cardmarket?.avg ??
+                        detalhe.pricing?.tcgplayer?.normal?.marketPrice ??
+                        0
+                };
+
+            })
+        );
 
         console.log(`Sucesso! ${cartasValidas.length} cartas encontradas.`);
 
         return cartasValidas;
 
     } catch (error) {
+
         console.error("Erro no Service:", error);
         throw error;
+
     }
 }
 
 
+
 export async function buscarCartaPorId(id) {
 
-    //http://localhost:3000/api/cartas/?name=charizard       exemplo 
+    const response = await fetch(
+        `${API_URL}/${encodeURIComponent(id)}`
+    );
 
-        const response = await fetch(
-            `${API_URL}/${encodeURIComponent(id)}`
-        );
-        if (!response.ok) {
+    if (!response.ok) {
         throw new Error(`Carta não encontrada: ${response.status}`);
-        }
-        
-        
-        const carta = await response.json();
+    }
 
-        return {
-            id: carta.id,
-            localId: carta.localId,
-            name: carta.name,
-            image: `${carta.image}/high.png`
-        };
+    const carta = await response.json();
+
+    return {
+        id: carta.id,
+        localId: carta.localId,
+        name: carta.name,
+        image: `${carta.image}/high.png`,
+        price:
+            carta.pricing?.cardmarket?.avg ??
+            carta.pricing?.tcgplayer?.normal?.marketPrice ??
+            0
+    };
 
 }

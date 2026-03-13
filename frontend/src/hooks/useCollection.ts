@@ -4,6 +4,7 @@ type Carta = {
     id: string
     name: string
     image: string
+    price: number
 }
 
 export default function useCollection() {

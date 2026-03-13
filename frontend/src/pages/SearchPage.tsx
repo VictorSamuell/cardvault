@@ -71,6 +71,7 @@ export default function SearchPage() {
                 key={carta.id}
                 name={carta.name}
                 image={carta.image}
+                price={carta.price}
                 onAdd={() => addCard(carta)}
             />
         ))}
