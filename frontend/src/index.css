@@ -1,8 +1,7 @@
-/* --- FUNDO E TIPOGRAFIA GERAL --- */
 body {
   font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: #121417; /* Fundo super escuro da referência */
-  color: #f3f4f6; /* Texto quase branco */
+  background: #121417; 
+  color: #f3f4f6; 
   margin: 0;
   -webkit-font-smoothing: antialiased;
 }
@@ -12,7 +11,7 @@ h1, h2, h3 {
   font-weight: 500;
 }
 
-/* --- NAVEGAÇÃO PRINCIPAL (Minimalista) --- */
+
 .main-nav {
   display: flex;
   justify-content: center;
@@ -20,7 +19,7 @@ h1, h2, h3 {
   gap: 40px;
   padding: 30px 20px;
   background: #121417; 
-  border-bottom: 1px solid #22262a; /* Linha divisória sutil */
+  border-bottom: 1px solid #22262a; 
   margin-bottom: 60px;
   
   width: 100vw; 
@@ -38,7 +37,7 @@ h1, h2, h3 {
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 1px;
-  color: #9ca3af; /* Cinza claro */
+  color: #9ca3af; 
   background-color: transparent;
   border: none;
   cursor: pointer;
@@ -46,10 +45,10 @@ h1, h2, h3 {
 }
 
 .main-nav button:hover {
-  color: #ffffff; /* Fica branco ao passar o mouse */
+  color: #f5f5f5; 
 }
 
-/* --- FORMULÁRIO DE BUSCA --- */
+
 .SearchForm {
   display: flex;
   flex-direction: column;
@@ -65,7 +64,7 @@ h1, h2, h3 {
   font-size: 1rem;
   background: transparent;
   border: none;
-  border-bottom: 1px solid #4b5563; /* Borda só embaixo */
+  border-bottom: 1px solid #4b5563; 
   border-radius: 0;
   color: #ffffff;
   outline: none;
@@ -80,7 +79,7 @@ h1, h2, h3 {
   border-bottom-color: #ffffff;
 }
 
-/* --- BOTÕES GERAIS (Ghost Buttons) --- */
+
 .SearchButton {
   padding: 12px 32px;
   font-size: 0.85rem;
@@ -90,7 +89,7 @@ h1, h2, h3 {
   color: #ffffff;
   background-color: transparent;
   border: 1px solid #ffffff;
-  border-radius: 50px; /* Botão em formato de pílula */
+  border-radius: 50px; 
   cursor: pointer;
   transition: all 0.3s ease;
 }
@@ -100,7 +99,7 @@ h1, h2, h3 {
   color: #121417;
 }
 
-/* --- GRID E CARDS (Estilo Editorial) --- */
+
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -111,7 +110,7 @@ h1, h2, h3 {
 }
 
 .card {
-  background: #181b1f; /* Um tom ligeiramente mais claro que o fundo */
+  background: #181b1f; 
   text-align: left;
   display: flex;
   flex-direction: column;
@@ -124,11 +123,11 @@ h1, h2, h3 {
 
 .card img {
   width: 100%;
-  background: #22262a; /* Fundo caso a imagem da carta seja transparente */
+  background: #22262a; 
   object-fit: cover;
 }
 
-/* O conteúdo do card ganha um padding para desgrudar da imagem */
+
 .card-content {
   padding: 24px;
   display: flex;
@@ -147,10 +146,10 @@ h1, h2, h3 {
   margin: 0 0 24px 0;
 }
 
-/* Botões dentro do card (Learn More style) */
+
 .addButton, .removeButton {
-  margin-top: auto; /* Empurra o botão pro final do card */
-  align-self: flex-start; /* Mantém o botão alinhado à esquerda */
+  margin-top: auto; 
+  align-self: flex-start;
   padding: 8px 0;
   font-size: 0.75rem;
   font-weight: 600;
@@ -172,7 +171,7 @@ h1, h2, h3 {
 }
 
 .addButton:hover {
-  color: #10b981; /* Um verde/teal elegante ao passar o mouse */
+  color: #10b981; 
 }
 
 .removeButton {
@@ -180,5 +179,5 @@ h1, h2, h3 {
 }
 
 .removeButton:hover {
-  color: #ef4444; /* Vermelho ao passar o mouse para remover */
+  color: #ef4444; 
 }

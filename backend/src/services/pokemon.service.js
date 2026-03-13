@@ -16,7 +16,7 @@ export async function procurarCartas(name) {
         // filtrar cartas com imagem e limitar resultados
         const cartasFiltradas = cartas
             .filter(carta => carta.image)
-            .slice(0,20);
+            .slice(0,50);
 
         // buscar preço de cada carta
         const cartasValidas = await Promise.all(
