@@ -1,10 +1,16 @@
 import { useState, useEffect } from "react"
 
 type Carta = { 
-    id: string
-    name: string
-    image: string
-    price: number
+    id: string;
+    name: string;
+    image: string | null;
+    price?: number;
+    prices?: Record<string, any>; 
+    set?: string | null;          
+    number?: string | null;         
+    rarity?: string | null;       
+    tcgplayerUrl?: string | null; 
+    updatedAt?: string | null;    
 }
 
 export default function useCollection() {

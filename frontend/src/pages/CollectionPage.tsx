@@ -26,15 +26,25 @@ return(
 
         <div className="grid">
         
-                {cartasOrdenadas.map((carta) => (
-                    <PokemonCard
-                        key={carta.id}
-                        name={carta.name}
-                        image={carta.image}
-                        price={carta.price}
-                        onRemove={() => removeCard(carta.id)}
-                    />
-                ))}
+                <div className="grid">
+    {cartasOrdenadas.map((carta) => (
+        <PokemonCard
+            key={carta.id}
+            id={carta.id}
+            name={carta.name}
+            image={carta.image}
+            price={carta.price}
+            prices={carta.prices}
+            set={carta.set}
+            number={carta.number}
+            rarity={carta.rarity}
+            tcgplayerUrl={carta.tcgplayerUrl}
+            updatedAt={carta.updatedAt}
+            onRemove={() => removeCard(carta.id)}
+            inCollection={true} 
+        />
+    ))}
+</div>
         
         </div>
 

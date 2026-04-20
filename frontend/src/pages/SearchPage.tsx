@@ -68,11 +68,18 @@ export default function SearchPage() {
 
         {cartas.map((carta) => (
             <PokemonCard
-                key={carta.id}
-                name={carta.name}
-                image={carta.image}
-                price={carta.price}
-                onAdd={() => addCard(carta)}
+              key={carta.id}
+              id={carta.id}           
+              name={carta.name}
+              image={carta.image}
+              price={carta.price}
+              prices={carta.prices}   
+              set={carta.set}         
+              number={carta.number}   
+              rarity={carta.rarity}   
+              tcgplayerUrl={carta.tcgplayerUrl}  
+              updatedAt={carta.updatedAt}        
+              onAdd={() => addCard(carta)}
             />
         ))}
 
