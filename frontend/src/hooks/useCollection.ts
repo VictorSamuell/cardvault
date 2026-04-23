@@ -4,7 +4,7 @@ type Carta = {
     id: string;
     name: string;
     image: string | null;
-    price?: number;
+    price: number;
     prices?: Record<string, any>; 
     set?: string | null;          
     number?: string | null;         

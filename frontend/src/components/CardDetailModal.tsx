@@ -263,6 +263,8 @@ export default function CardDetailModal({ carta, onClose, onAdd, onRemove, inCol
         </div>
 
         {/* Rodapé */}
+        {}
+        
         <div style={{
           borderTop: "1px solid #22262a",
           padding: "16px 28px",
@@ -272,7 +274,17 @@ export default function CardDetailModal({ carta, onClose, onAdd, onRemove, inCol
             <button
               onClick={onRemove}
               className="removeButton"
-              style={{ fontSize: "0.8rem" }}
+              style={{
+                padding: "8px 20px",
+                borderRadius: "99px",
+                border: "1px solid #374151",
+                color: "#9ca3af",
+                fontSize: "0.8rem",
+                textDecoration: "none",
+                textTransform: "uppercase",
+                letterSpacing: "1px",
+                fontWeight: 600,
+              }}
             >
               Remover da coleção
             </button>
@@ -280,7 +292,17 @@ export default function CardDetailModal({ carta, onClose, onAdd, onRemove, inCol
             <button
               onClick={onAdd}
               className="addButton"
-              style={{ fontSize: "0.8rem" }}
+              style={{
+                padding: "8px 20px",
+                borderRadius: "99px",
+                border: "1px solid #374151",
+                color: "#9ca3af",
+                fontSize: "0.8rem",
+                textDecoration: "none",
+                textTransform: "uppercase",
+                letterSpacing: "1px",
+                fontWeight: 600,
+              }}
             >
               Adicionar à coleção
             </button>
