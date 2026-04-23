@@ -8,6 +8,7 @@ export default function AuthPage() {
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
   const [erro, setErro] = useState("")
   const [loading, setLoading] = useState(false)
 
@@ -19,9 +20,19 @@ export default function AuthPage() {
       return
     }
 
-    if (modo === "register" && !name) {
-      setErro("Informe seu nome.")
-      return
+    if (modo === "register") {
+      if (!name) {
+        setErro("Informe seu nome.")
+        return
+      }
+      if (password.length < 6) {
+        setErro("Senha deve ter ao menos 6 caracteres.")
+        return
+      }
+      if (password !== confirmPassword) {
+        setErro("As senhas não coincidem.")
+        return
+      }
     }
 
     try {
@@ -42,6 +53,15 @@ export default function AuthPage() {
     if (e.key === "Enter") handleSubmit()
   }
 
+  function trocarModo() {
+    setModo(modo === "login" ? "register" : "login")
+    setErro("")
+    setName("")
+    setEmail("")
+    setPassword("")
+    setConfirmPassword("")
+  }
+
   return (
     <div style={{
       display: "flex",
@@ -56,13 +76,8 @@ export default function AuthPage() {
         {modo === "login" ? "Entre na sua conta" : "Crie sua conta"}
       </p>
 
-      <div style={{
-        width: "100%",
-        maxWidth: "360px",
-        display: "flex",
-        flexDirection: "column",
-        gap: "16px",
-      }}>
+      <div style={{ width: "100%", maxWidth: "360px", display: "flex", flexDirection: "column", gap: "16px" }}>
+
         {modo === "register" && (
           <input
             className="SearchInput"
@@ -94,6 +109,39 @@ export default function AuthPage() {
           onKeyDown={handleKeyDown}
         />
 
+        {/* Confirmação só aparece no cadastro */}
+        {modo === "register" && (
+          <div style={{ position: "relative" }}>
+            <input
+              className="SearchInput"
+              style={{
+                maxWidth: "100%",
+                borderBottomColor: confirmPassword
+                  ? password === confirmPassword ? "#1D9E75" : "#ef4444"
+                  : "#4b5563",
+              }}
+              placeholder="Confirmar senha"
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              onKeyDown={handleKeyDown}
+            />
+            {/* Ícone de feedback */}
+            {confirmPassword && (
+              <span style={{
+                position: "absolute",
+                right: "0",
+                top: "50%",
+                transform: "translateY(-50%)",
+                fontSize: "14px",
+                color: password === confirmPassword ? "#1D9E75" : "#ef4444",
+              }}>
+                {password === confirmPassword ? "✓" : "✗"}
+              </span>
+            )}
+          </div>
+        )}
+
         {erro && (
           <p style={{ color: "#ef4444", fontSize: "0.85rem", margin: 0 }}>
             {erro}
@@ -110,20 +158,15 @@ export default function AuthPage() {
         </button>
 
         <button
-          onClick={() => { setModo(modo === "login" ? "register" : "login"); setErro("") }}
+          onClick={trocarModo}
           style={{
-            background: "none",
-            border: "none",
-            color: "#6b7280",
-            fontSize: "0.85rem",
-            cursor: "pointer",
-            marginTop: "8px",
+            background: "none", border: "none", color: "#6b7280",
+            fontSize: "0.85rem", cursor: "pointer", marginTop: "8px",
           }}
         >
-          {modo === "login"
-            ? "Não tem conta? Cadastre-se"
-            : "Já tem conta? Entre"}
+          {modo === "login" ? "Não tem conta? Cadastre-se" : "Já tem conta? Entre"}
         </button>
+
       </div>
     </div>
   )

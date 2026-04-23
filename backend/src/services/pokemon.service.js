@@ -53,7 +53,9 @@ export async function procurarCartas(name) {
     try {
         // A Pokemon TCG API usa sintaxe de query: name:pikachu
         const response = await fetch(
-            `${API_URL}/cards?q=name:"${encodeURIComponent(name)}"&pageSize=50&orderBy=-tcgplayer.prices.holofoil.market`,
+            `${API_URL}/cards?q=name:${encodeURIComponent(name)}*&pageSize=70&orderBy=-tcgplayer.prices.holofoil.market`,
+            // `${API_URL}/cards?q=name:"${encodeURIComponent(name)}"&pageSize=70&orderBy=-tcgplayer.prices.holofoil.market`
+            // esse orderBy ordena as cartas pelo preço holofoil mais alto, para trazer primeiro as mais valiosas , e apenas se pesquisar o nome completo
             {
                 headers: {
                     // Se tiver chave de API, coloque aqui:

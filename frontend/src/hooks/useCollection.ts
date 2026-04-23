@@ -1,65 +1,90 @@
 import { useState, useEffect } from "react"
 
-type Carta = { 
-    id: string;
-    name: string;
-    image: string | null;
-    price: number;
-    prices?: Record<string, any>; 
-    set?: string | null;          
-    number?: string | null;         
-    rarity?: string | null;       
-    tcgplayerUrl?: string | null; 
-    updatedAt?: string | null;    
+export type Carta = {
+  id: string
+  name: string
+  image: string | null
+  price: number
+  prices: Record<string, {
+    low: number | null
+    mid: number | null
+    high: number | null
+    market: number | null
+  }>
+  set: string | null
+  number: string | null
+  rarity: string | null
+  tcgplayerUrl: string | null
+  updatedAt: string | null
+}
+
+const API_URL = "http://localhost:3000/api"
+
+function getToken() {
+  return localStorage.getItem("cardvault_token")
 }
 
 export default function useCollection() {
-
   const [collection, setCollection] = useState<Carta[]>([])
+  const [loading, setLoading] = useState(true)
 
+  // Busca a coleção do banco ao iniciar
   useEffect(() => {
-
-    const saved = localStorage.getItem("cardvault_collection")
-
-    if (saved) {
-      setCollection(JSON.parse(saved))
+    const token = getToken()
+    if (!token) {
+      setLoading(false)
+      return
     }
 
+    fetch(`${API_URL}/collection`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(res => res.json())
+      .then(data => setCollection(data.cards ?? []))
+      .catch(err => console.error("Erro ao carregar coleção:", err))
+      .finally(() => setLoading(false))
   }, [])
 
-  function addCard(carta: Carta) {
+  async function addCard(carta: Carta) {
+    const token = getToken()
+    if (!token) return
 
-    console.log("adicionando carta", carta)
     const exists = collection.find(c => c.id === carta.id)
-    //se ja existir
     if (exists) return
 
-    const updated = [...collection, carta]
+    try {
+      const res = await fetch(`${API_URL}/collection`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(carta),
+      })
 
-    setCollection(updated)
-
-    localStorage.setItem(
-      "cardvault_collection",
-      JSON.stringify(updated)
-    )
+      const data = await res.json()
+      if (res.ok) setCollection(data.cards)
+    } catch (err) {
+      console.error("Erro ao adicionar carta:", err)
+    }
   }
 
-  function removeCard(id: string) {
+  async function removeCard(id: string) {
+    const token = getToken()
+    if (!token) return
 
-    const updated = collection.filter(c => c.id !== id)
+    try {
+      const res = await fetch(`${API_URL}/collection/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      })
 
-    setCollection(updated)
-
-    localStorage.setItem(
-      "cardvault_collection",
-      JSON.stringify(updated)
-    )
+      const data = await res.json()
+      if (res.ok) setCollection(data.cards)
+    } catch (err) {
+      console.error("Erro ao remover carta:", err)
+    }
   }
 
-  return {
-    collection,
-    addCard,
-    removeCard
-  }
-
+  return { collection, loading, addCard, removeCard }
 }
