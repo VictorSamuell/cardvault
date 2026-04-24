@@ -8,21 +8,20 @@ import cors from "cors"
 import mongoose from "mongoose"
 import cardsRoutes from "./routes/cards.routes.js"
 import authRoutes from "./routes/auth.routes.js"
+import setsRoutes from "./routes/sets.routes.js"
 import collectionRoutes from "./routes/collection.routes.js"
 
 const app = express()
-
 app.use(cors())
 app.use(express.json())
 
 app.get("/favicon.ico", (req, res) => res.status(204).end())
 app.use("/api/auth", authRoutes)
 app.use("/api", cardsRoutes)
+app.use("/api", setsRoutes)
 app.use("/api", collectionRoutes)
 
-app.get("/", (req, res) => {
-  res.json({ message: "CardVault API running" })
-})
+app.get("/", (req, res) => res.json({ message: "CardVault API running" }))
 
 mongoose
   .connect(process.env.MONGO_URI)
