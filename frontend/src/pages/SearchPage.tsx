@@ -3,7 +3,7 @@ import { buscarCartas } from "../services/cards.service"
 import PokemonCard from "../components/PokemonCard"
 import useCollection from "../hooks/useCollection"
 
-const API_URL = "http://localhost:3000/api"
+const API_URL = "https://cardvault-backend-plgs.onrender.com/api"
 
 interface SetInfo {
   id: string

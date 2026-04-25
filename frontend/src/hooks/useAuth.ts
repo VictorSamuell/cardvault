@@ -5,8 +5,7 @@ interface User {
   name: string
   email: string
 }
-
-const API_URL = "http://localhost:3000/api/auth"
+const API_URL = "https://cardvault-backend-plgs.onrender.com/api/auth"
 
 export default function useAuth() {
   const [user, setUser] = useState<User | null>(null)
