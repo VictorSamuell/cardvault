@@ -4,6 +4,17 @@ import useAuth from "../hooks/useAuth"
 export default function AuthPage() {
   const { login, register } = useAuth()
 
+/*
+Um padrão amplamente aceito que está em conformidade com a maioria dos padrões de validação de e-mail é o seguinte:
+
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+*/
+
+function emailValido(email : string) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+}
+
+
   const [modo, setModo] = useState<"login" | "register">("login")
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
@@ -12,13 +23,23 @@ export default function AuthPage() {
   const [erro, setErro] = useState("")
   const [loading, setLoading] = useState(false)
 
+
+  
   async function handleSubmit() {
     setErro("")
+
 
     if (!email || !password) {
       setErro("Preencha todos os campos.")
       return
     }
+
+    // aplicando validação de email usando regex
+    if(!emailValido(email)) {
+      setErro("Email inválido.")
+      return
+    }
+
 
     if (modo === "register") {
       if (!name) {

@@ -11,8 +11,17 @@ function gerarToken(userId) {
   )
 }
 
+function emailValido(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+}
+
+
 export async function register(req, res) {
   const { name, email, password } = req.body
+
+  if(!emailValido(email)) {
+    return res.status(400).json({ error: "Email inválido." })
+  }
 
   if (!name || !email || !password) {
     return res.status(400).json({ error: "Preencha todos os campos." })
@@ -47,6 +56,10 @@ export async function register(req, res) {
 
 export async function login(req, res) {
   const { email, password } = req.body
+
+  if(!emailValido(email)) {
+    return res.status(400).json({ error: "Email inválido." })
+  }
 
   if (!email || !password) {
     return res.status(400).json({ error: "Preencha email e senha." })
