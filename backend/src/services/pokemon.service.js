@@ -1,17 +1,8 @@
-// Troca: TCGDex (sem preços) → Pokemon TCG API (preços reais do TCGPlayer)
-// Documentação: https://docs.pokemontcg.io
-// Gratuito sem chave. Com chave (pokemontcg.io) tem rate limit maior.
-
 const API_URL = "https://api.pokemontcg.io/v2";
 
-// https://api.pokemontcg.io/v2/cards?q=name:
-
-// Extrai o melhor preço disponível de um card
 function extrairPreco(card) {
     const prices = card?.tcgplayer?.prices;
     if (!prices) return 0;
-
-    // Prioridade: holofoil > normal > reverseHolofoil > 1stEditionHolofoil
     const ordem = ["holofoil", "normal", "reverseHolofoil", "1stEditionHolofoil"];
     for (const tipo of ordem) {
         const preco = prices[tipo]?.market ?? prices[tipo]?.mid ?? prices[tipo]?.low;
@@ -20,11 +11,9 @@ function extrairPreco(card) {
     return 0;
 }
 
-// Extrai todos os preços disponíveis (para exibir detalhes)
 function extrairTodosPrecos(card) {
     const prices = card?.tcgplayer?.prices ?? {};
     const resultado = {};
-
     for (const [tipo, dados] of Object.entries(prices)) {
         resultado[tipo] = {
             low: dados.low ?? null,
@@ -51,16 +40,27 @@ function formatarCarta(card) {
     };
 }
 
+function montarQuery(name) {
+    const temEspaco = name.includes(" ")
+    if (temEspaco) {
+        // Nome com espaço: aspas + wildcard no final
+        // "M Mewtwo" → name:"M Mewtwo*"
+        return `name:"${name}*"`
+    } else {
+        // Nome simples: wildcard livre
+        // "pikachu" → name:pikachu*
+        return `name:${name}*`
+    }
+}
+
 export async function procurarCartas(name) {
     try {
-        // A Pokemon TCG API usa sintaxe de query: name:pikachu
+        const query = montarQuery(name)
+
         const response = await fetch(
-            `${API_URL}/cards?q=name:${encodeURIComponent(name)}*&pageSize=70&orderBy=-tcgplayer.prices.holofoil.market`,
-            // `${API_URL}/cards?q=name:"${encodeURIComponent(name)}"&pageSize=70&orderBy=-tcgplayer.prices.holofoil.market`
-            // esse orderBy ordena as cartas pelo preço holofoil mais alto, para trazer primeiro as mais valiosas , e apenas se pesquisar o nome completo
+            `${API_URL}/cards?q=${encodeURIComponent(query)}&pageSize=70&orderBy=-tcgplayer.prices.holofoil.market`,
             {
                 headers: {
-                    // Se tiver chave de API, coloque aqui:
                     // "X-Api-Key": process.env.POKEMONTCG_API_KEY ?? ""
                 }
             }
@@ -73,7 +73,6 @@ export async function procurarCartas(name) {
         const data = await response.json();
         const cards = data.data ?? [];
 
-        // Filtrar cartas que têm imagem
         const cartas = cards
             .filter(card => card.images?.large || card.images?.small)
             .map(formatarCarta);

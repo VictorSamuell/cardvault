@@ -17,6 +17,7 @@ function App() {
   return (
     <div>
       <nav className="main-nav">
+        <img src="/icon.svg" alt="CardVault" style={{ height: "28px" }} />
         <button
           onClick={() => setPage("search")}
           className={page === "search" ? "nav-active" : ""}
