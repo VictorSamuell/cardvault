@@ -4,6 +4,8 @@
 
 const API_URL = "https://api.pokemontcg.io/v2";
 
+// https://api.pokemontcg.io/v2/cards?q=name:
+
 // Extrai o melhor preço disponível de um card
 function extrairPreco(card) {
     const prices = card?.tcgplayer?.prices;
