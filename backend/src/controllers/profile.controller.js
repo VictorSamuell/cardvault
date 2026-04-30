@@ -21,7 +21,17 @@ export const getProfile = async (req, res) => {
     let collection = []
     if (user.isPublic) {
       const col = await Collection.findOne({ userId: user._id })
-      collection = col?.cards || []
+      // Mapeia o campo 'image' para 'imageUrl' para consistência com o frontend
+      if (col?.cards) {
+        collection = col.cards.map((c) => ({
+          id: c.id,
+          name: c.name,
+          imageUrl: c.image,
+          price: c.price,
+          rarity: c.rarity,
+          set: c.set,
+        }))
+      }
     }
 
     res.json({ user, collection })

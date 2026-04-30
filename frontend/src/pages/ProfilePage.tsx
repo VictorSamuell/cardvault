@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react"
 import useProfile, { type ProfileUser, type ProfileCard } from "../hooks/useProfile"
 import useAuth from "../hooks/useAuth"
+import PokemonCard from "../components/PokemonCard"
+import useCollection, { type Carta } from "../hooks/useCollection"
 
 interface Props {
   username: string
@@ -12,6 +14,9 @@ export default function ProfilePage({ username, onBack }: Props) {
   const { user: me } = useAuth()
   const [profileUser, setProfileUser] = useState<ProfileUser | null>(null)
   const [collection, setCollection] = useState<ProfileCard[]>([])
+
+  const { addCard, collection: myCollection } = useCollection()
+  const myCollectionIds = new Set(myCollection.map(c => c.id))
 
   useEffect(() => {
     fetchProfile(username).then((data) => {
@@ -67,8 +72,8 @@ export default function ProfilePage({ username, onBack }: Props) {
             : initials}
         </div>
 
-        {/* Info */}
-        <div style={{ flex: 1 }}>
+        {/* Info com flex-basis para quebrar linha no celular se necessário */}
+        <div style={{ flex: "1 1 250px" }}>
           <h2 style={{ margin: "0 0 4px", fontSize: "1.4rem", fontWeight: 500 }}>{profileUser.name}</h2>
           <p style={{ margin: "0 0 12px", color: "#6b7280", fontSize: "0.8rem", letterSpacing: "1px" }}>
             @{profileUser.username}
@@ -103,15 +108,33 @@ export default function ProfilePage({ username, onBack }: Props) {
           </h3>
           <div className="grid" style={{ padding: 0 }}>
             {collection.map((card) => (
-              <div key={card.id} className="card">
-                <img src={card.imageUrl} alt={card.name} />
-                <div className="card-content">
-                  <h3>{card.name}</h3>
-                  {card.price != null && (
-                    <p className="price">${card.price.toFixed(2)}</p>
-                  )}
-                </div>
-              </div>
+              <PokemonCard
+                key={card.id}
+                id={card.id}
+                name={card.name}
+                image={card.imageUrl}
+                price={card.price || 0}
+                prices={{}}
+                set={card.set || null}
+                number={null}
+                rarity={card.rarity || null}
+                tcgplayerUrl={null}
+                updatedAt={null}
+                onAdd={!isOwner ? () => {
+                  // Converte de ProfileCard para o tipo Carta esperado pela coleção
+                  const cardToAdd: Carta = {
+                    id: card.id,
+                    name: card.name,
+                    image: card.imageUrl,
+                    price: card.price || 0,
+                    set: card.set || null,
+                    rarity: card.rarity || null,
+                    prices: {}, number: null, tcgplayerUrl: null, updatedAt: null,
+                  }
+                  addCard(cardToAdd)
+                } : undefined}
+                inCollection={myCollectionIds.has(card.id)}
+              />
             ))}
           </div>
         </>

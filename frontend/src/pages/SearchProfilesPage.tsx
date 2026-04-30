@@ -30,7 +30,7 @@ export default function SearchProfilesPage({ onViewProfile }: Props) {
     name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase()
 
   return (
-    <div style={{ maxWidth: "600px", margin: "0 auto", padding: "0 20px 80px" }}>
+    <div style={{ maxWidth: "600px", margin: "0 auto", padding: "0 20px 80px", textAlign: "center" }}>
       <h2 style={{ fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "2px", color: "#6b7280", marginBottom: "32px", fontWeight: 500 }}>
         Buscar colecionadores
       </h2>
@@ -42,7 +42,7 @@ export default function SearchProfilesPage({ onViewProfile }: Props) {
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         autoFocus
-        style={{ marginBottom: "40px", display: "block" }}
+        style={{ display: "block", margin: "0 auto 40px", width: "100%" }}
       />
 
       {searching && (
@@ -57,7 +57,7 @@ export default function SearchProfilesPage({ onViewProfile }: Props) {
         </p>
       )}
 
-      <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: "12px", textAlign: "left" }}>
         {results.map((u) => (
           <button
             key={u.username}

@@ -79,7 +79,7 @@ export default function SettingsPage({ onBack }: Props) {
 
       {/* PAINEL DE PERFIL */}
       <div style={panelStyle}>
-        <div style={{ display: "flex", alignItems: "center", gap: "20px", marginBottom: "32px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "20px", marginBottom: "32px", flexWrap: "wrap" }}>
           <div style={{
             width: "72px", height: "72px", borderRadius: "50%",
             background: form.avatarUrl ? "transparent" : "#22262a",
@@ -108,7 +108,7 @@ export default function SettingsPage({ onBack }: Props) {
       {/* PAINEL DE PRIVACIDADE */}
       <div style={{ ...panelStyle, display: "flex", flexDirection: "column", gap: "20px" }}>
           <label style={labelStyle}>Visibilidade da coleção</label>
-          <div style={{ display: "flex", gap: "12px" }}>
+          <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
             {[{ val: true, label: "Pública" }, { val: false, label: "Privada" }].map(opt => (
               <button
                 key={String(opt.val)}
@@ -187,7 +187,7 @@ const panelStyle: React.CSSProperties = {
   background: "#181b1f",
   border: "1px solid #22262a",
   borderRadius: "16px",
-  padding: "28px",
+  padding: "clamp(20px, 5vw, 28px)",
   marginBottom: "24px",
 }
 
