@@ -10,6 +10,7 @@ import cardsRoutes from "./routes/cards.routes.js"
 import authRoutes from "./routes/auth.routes.js"
 import setsRoutes from "./routes/sets.routes.js"
 import collectionRoutes from "./routes/collection.routes.js"
+import profileRoutes from "./routes/profile.routes.js"
 
 const app = express()
 app.use(cors())
@@ -20,6 +21,7 @@ app.use("/api/auth", authRoutes)
 app.use("/api", cardsRoutes)
 app.use("/api", setsRoutes)
 app.use("/api", collectionRoutes)
+app.use("/api", profileRoutes)
 
 app.get("/", (req, res) => res.json({ message: "CardVault API running" }))
 

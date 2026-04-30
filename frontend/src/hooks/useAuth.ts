@@ -4,6 +4,7 @@ interface User {
   id: string
   name: string
   email: string
+  username?: string
 }
 const API_URL = "https://cardvault-backend-plgs.onrender.com/api/auth"
 
