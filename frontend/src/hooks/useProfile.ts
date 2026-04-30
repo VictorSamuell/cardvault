@@ -31,7 +31,11 @@ export default function useProfile() {
     setLoading(true)
     setError("")
     try {
-      const res = await fetch(`${API}/profile/${username}`)
+      const res = await fetch(`${API}/profile/${username}`, {
+        headers: {
+          Authorization: `Bearer ${getToken()}`,
+        },
+      })
       if (!res.ok) throw new Error((await res.json()).error || "Perfil não encontrado")
       return await res.json() as { user: ProfileUser; collection: ProfileCard[] }
     } catch (e: any) {
@@ -45,7 +49,11 @@ export default function useProfile() {
   const searchProfiles = async (q: string) => {
     if (q.length < 2) return []
     try {
-      const res = await fetch(`${API}/profile/search?q=${encodeURIComponent(q)}`)
+      const res = await fetch(`${API}/profile/search?q=${encodeURIComponent(q)}`, {
+        headers: {
+          Authorization: `Bearer ${getToken()}`,
+        },
+      })
       return await res.json() as ProfileUser[]
     } catch {
       return []

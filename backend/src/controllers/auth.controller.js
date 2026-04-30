@@ -10,6 +10,7 @@ function emailValido(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
 }
 
+
 // Gera username único baseado no nome
 async function gerarUsername(name) {
   const base = name.toLowerCase().replace(/\s+/g, "").replace(/[^a-z0-9]/g, "")
