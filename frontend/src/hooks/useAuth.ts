@@ -6,7 +6,8 @@ interface User {
   email: string
   username?: string
 }
-const API_URL = "https://cardvault-backend-plgs.onrender.com/api/auth"
+const BASE_API = import.meta.env.VITE_API_URL || "https://cardvault-backend-plgs.onrender.com/api"
+const API_URL = `${BASE_API}/auth`
 
 export default function useAuth() {
   const [user, setUser] = useState<User | null>(null)

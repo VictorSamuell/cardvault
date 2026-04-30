@@ -18,7 +18,7 @@ export type Carta = {
   updatedAt: string | null
 }
 
-const API_URL = "https://cardvault-backend-plgs.onrender.com/api"
+const API_URL = import.meta.env.VITE_API_URL || "https://cardvault-backend-plgs.onrender.com/api"
 
 function getToken() {
   return localStorage.getItem("cardvault_token")
