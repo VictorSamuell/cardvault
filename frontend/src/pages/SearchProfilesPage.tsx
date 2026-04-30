@@ -12,6 +12,17 @@ export default function SearchProfilesPage({ onViewProfile }: Props) {
   const [searching, setSearching] = useState(false)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
+  const [recentSearches, setRecentSearches] = useState<string[]>([])
+
+  useEffect(() => {
+    const saved = localStorage.getItem("cardvault_recent_searches")
+    if (saved) {
+      try {
+        setRecentSearches(JSON.parse(saved))
+      } catch {}
+    }
+  }, [])
+
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current)
     if (query.length < 2) { setResults([]); return }
@@ -25,6 +36,14 @@ export default function SearchProfilesPage({ onViewProfile }: Props) {
 
     return () => { if (debounceRef.current) clearTimeout(debounceRef.current) }
   }, [query])
+
+  const handleViewProfile = (username: string) => {
+    // Adiciona o username no início da lista, remove duplicatas e mantém no máximo os 5 mais recentes
+    const updated = [username, ...recentSearches.filter(u => u !== username)].slice(0, 5)
+    setRecentSearches(updated)
+    localStorage.setItem("cardvault_recent_searches", JSON.stringify(updated))
+    onViewProfile(username)
+  }
 
   const getInitials = (name: string) =>
     name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase()
@@ -45,6 +64,44 @@ export default function SearchProfilesPage({ onViewProfile }: Props) {
         style={{ display: "block", margin: "0 auto 40px", width: "100%" }}
       />
 
+      {/* SESSÃO DE SUGESTÕES (Aparece apenas quando não está buscando) */}
+      {query.length < 2 && (
+        <div style={{ textAlign: "left", marginBottom: "40px" }}>
+          {recentSearches.length > 0 && (
+            <div style={{ marginBottom: "24px" }}>
+              <h3 style={{ fontSize: "0.7rem", textTransform: "uppercase", letterSpacing: "1px", color: "#6b7280", marginBottom: "12px", fontWeight: 500 }}>
+                Recentes
+              </h3>
+              <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                {recentSearches.map(username => (
+                  <button key={username} onClick={() => setQuery(username)} style={suggestionBtnStyle}
+                    onMouseEnter={e => { e.currentTarget.style.background = "#22262a"; e.currentTarget.style.color = "#fff" }}
+                    onMouseLeave={e => { e.currentTarget.style.background = "#181b1f"; e.currentTarget.style.color = "#9ca3af" }}>
+                    @{username}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div>
+            <h3 style={{ fontSize: "0.7rem", textTransform: "uppercase", letterSpacing: "1px", color: "#6b7280", marginBottom: "12px", fontWeight: 500 }}>
+              Populares
+            </h3>
+            <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+              {/* Aqui você pode alterar a lista de usuários populares à vontade */}
+              {["pikachu", "cinegripe", "victorss"].map(username => (
+                <button key={username} onClick={() => setQuery(username)} style={suggestionBtnStyle}
+                  onMouseEnter={e => { e.currentTarget.style.background = "#22262a"; e.currentTarget.style.color = "#fff" }}
+                  onMouseLeave={e => { e.currentTarget.style.background = "#181b1f"; e.currentTarget.style.color = "#9ca3af" }}>
+                  @{username}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       {searching && (
         <p style={{ color: "#6b7280", fontSize: "0.8rem", letterSpacing: "1px", textTransform: "uppercase" }}>
           Buscando...
@@ -57,11 +114,13 @@ export default function SearchProfilesPage({ onViewProfile }: Props) {
         </p>
       )}
 
+      
+      
       <div style={{ display: "flex", flexDirection: "column", gap: "12px", textAlign: "left" }}>
         {results.map((u) => (
           <button
             key={u.username}
-            onClick={() => onViewProfile(u.username)}
+            onClick={() => handleViewProfile(u.username)}
             style={{
               display: "flex", alignItems: "center", gap: "16px",
               background: "#181b1f", border: "1px solid #22262a", borderRadius: "12px",
@@ -98,4 +157,15 @@ export default function SearchProfilesPage({ onViewProfile }: Props) {
       </div>
     </div>
   )
+}
+
+const suggestionBtnStyle: React.CSSProperties = {
+  background: "#181b1f",
+  border: "1px solid #22262a",
+  borderRadius: "99px",
+  padding: "6px 16px",
+  color: "#9ca3af",
+  fontSize: "0.8rem",
+  cursor: "pointer",
+  transition: "all 0.2s ease",
 }
