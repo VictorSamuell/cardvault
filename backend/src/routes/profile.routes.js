@@ -9,14 +9,14 @@ import {
 
 const router = express.Router()
 
+// Protegidas — só o dono pode editar
+router.patch("/profile/me/password", authMiddleware, changePassword)
+router.patch("/profile/me", authMiddleware, updateProfile)
+
 // Pública — busca perfis por nome ou username
 router.get("/profile/search", searchProfiles)
 
 // Pública — pega perfil de um usuário pelo username
 router.get("/profile/:username", getProfile)
-
-// Protegidas — só o dono pode editar
-router.patch("/profile/me", authMiddleware, updateProfile)
-router.patch("/profile/me/password", authMiddleware, changePassword)
 
 export default router
