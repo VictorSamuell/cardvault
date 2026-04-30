@@ -50,7 +50,7 @@ userSchema.pre("save", async function (next) {
     const base = this.name.toLowerCase().replace(/\s+/g, "").replace(/[^a-z0-9]/g, "")
     let candidate = base
     let i = 1
-    while (await mongoose.model("User").exists({ username: candidate })) {
+    while (await User.exists({ username: candidate })) {
       candidate = `${base}${i++}`
     }
     this.username = candidate
