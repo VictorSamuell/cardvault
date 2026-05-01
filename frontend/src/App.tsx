@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { Search, Archive, Users, Settings, LogOut } from "lucide-react"
 import useAuth from "./hooks/useAuth"
 import useCollection from "./hooks/useCollection"
 import SearchPage from "./pages/SearchPage.tsx"
@@ -16,6 +17,7 @@ function App() {
   const { collection } = useCollection()
   const [page, setPage] = useState<Page>("search")
   const [viewingUsername, setViewingUsername] = useState("")
+  const [menuOpen, setMenuOpen] = useState(false)
 
   if (loading) return null
   if (!user) return <AuthPage />
@@ -25,57 +27,141 @@ function App() {
     setPage("profile")
   }
 
+  const navigate = (p: Page) => {
+    setPage(p)
+    setMenuOpen(false)
+  }
+
   return (
     <div>
+      {/* ── NAVBAR ── */}
       <nav className="main-nav">
-        <img src="/icon.svg" alt="CardVault" style={{ height: "28px" }} />
+        {/* Logo */}
+        <div className="nav-logo">
+          <img src="/icon.svg" alt="CardVault" style={{ height: "28px" }} />
+        </div>
 
-        <button onClick={() => setPage("search")} className={page === "search" ? "nav-active" : ""}>
-          Buscar
-        </button>
+        {/* Links — desktop */}
+        <div className="nav-links">
+          <button onClick={() => navigate("search")} className={page === "search" ? "nav-active" : ""}>
+            Buscar
+          </button>
 
-        <button onClick={() => setPage("collection")} className={page === "collection" ? "nav-active" : ""}>
-          Coleção
-          {collection.length > 0 && (
-            <span style={{
-              marginLeft: "8px", fontSize: "0.7rem",
-              background: "#22262a", color: "#9ca3af",
-              padding: "2px 7px", borderRadius: "99px",
-            }}>
-              {collection.length}
-            </span>
-          )}
-        </button>
+          <button onClick={() => navigate("collection")} className={page === "collection" ? "nav-active" : ""}>
+            Coleção
+            {collection.length > 0 && (
+              <span style={{
+                marginLeft: "8px", fontSize: "0.7rem",
+                background: "#22262a", color: "#9ca3af",
+                padding: "2px 7px", borderRadius: "99px",
+              }}>
+                {collection.length}
+              </span>
+            )}
+          </button>
 
-        <button onClick={() => setPage("profiles")} className={page === "profiles" || page === "profile" ? "nav-active" : ""}>
-          Perfis
-        </button>
+          <button onClick={() => navigate("profiles")} className={page === "profiles" || page === "profile" ? "nav-active" : ""}>
+            Perfis
+          </button>
+        </div>
 
-        <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: "16px" }}>
+        {/* Ações — desktop */}
+        <div className="nav-actions">
           <button
-            onClick={() => setPage("settings")}
+            onClick={() => navigate("settings")}
             style={{
-              background: "none", border: "none",
               color: page === "settings" ? "#fff" : "#6b7280",
-              fontSize: "0.85rem", cursor: "pointer", padding: "8px 0",
+              fontSize: "0.85rem",
               transition: "color 0.2s",
             }}
           >
             {user.name}
           </button>
-          <button
-            onClick={logout}
-            style={{
-              background: "none", border: "none",
-              color: "#6b7280", fontSize: "0.85rem",
-              cursor: "pointer", padding: "8px 0",
-            }}
-          >
+          <button onClick={logout} style={{ color: "#6b7280", fontSize: "0.85rem" }}>
             Sair
           </button>
         </div>
+
+        {/* Hambúrguer — mobile */}
+        <button
+          className="nav-hamburger"
+          onClick={() => setMenuOpen(true)}
+          aria-label="Abrir menu"
+        >
+          <span />
+          <span />
+          <span />
+        </button>
       </nav>
 
+      {/* ── MENU MOBILE (gaveta) ── */}
+      <div className={`nav-mobile-overlay${menuOpen ? " open" : ""}`}>
+        <div className="nav-mobile-backdrop" onClick={() => setMenuOpen(false)} />
+        <div className="nav-mobile-drawer">
+          {/* Header da gaveta */}
+          <div className="nav-mobile-header">
+            <img src="/icon.svg" alt="CardVault" style={{ height: "24px" }} />
+            <button className="nav-mobile-close" onClick={() => setMenuOpen(false)}>✕</button>
+          </div>
+
+          {/* Links principais */}
+          <div className="nav-mobile-links">
+            <button
+              onClick={() => navigate("search")}
+              className={page === "search" ? "nav-active" : ""}
+            >
+              <Search size={15} strokeWidth={1.5} />
+              Buscar
+            </button>
+
+            <button
+              onClick={() => navigate("collection")}
+              className={page === "collection" ? "nav-active" : ""}
+            >
+              <Archive size={15} strokeWidth={1.5} />
+              Coleção
+              {collection.length > 0 && (
+                <span style={{
+                  marginLeft: "8px", fontSize: "0.7rem",
+                  background: "#22262a", color: "#9ca3af",
+                  padding: "2px 7px", borderRadius: "99px",
+                }}>
+                  {collection.length}
+                </span>
+              )}
+            </button>
+
+            <button
+              onClick={() => navigate("profiles")}
+              className={page === "profiles" || page === "profile" ? "nav-active" : ""}
+            >
+              <Users size={15} strokeWidth={1.5} />
+              Perfis
+            </button>
+
+            <button
+              onClick={() => navigate("settings")}
+              className={page === "settings" ? "nav-active" : ""}
+            >
+              <Settings size={15} strokeWidth={1.5} />
+              Configurações
+            </button>
+          </div>
+
+          {/* Rodapé com info do usuário + sair */}
+          <div className="nav-mobile-footer">
+            <div style={{ padding: "4px 12px 12px", fontSize: "0.8rem", color: "#6b7280" }}>
+              Logado como <span style={{ color: "#fff" }}>{user.name}</span>
+            </div>
+            <button onClick={() => { logout(); setMenuOpen(false) }} style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <LogOut size={14} strokeWidth={1.5} />
+              Sair
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* ── PÁGINAS ── */}
       {page === "search" && <SearchPage />}
       {page === "collection" && <CollectionPage />}
       {page === "profiles" && <SearchProfilesPage onViewProfile={goToProfile} />}

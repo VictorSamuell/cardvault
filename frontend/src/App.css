@@ -4,9 +4,3 @@
   padding: 0;
   text-align: center;
 }
-
-.main-nav button.nav-active {
-  color: #ffffff;
-  border-bottom: 1px solid #ffffff;
-  padding-bottom: 7px;
-}
