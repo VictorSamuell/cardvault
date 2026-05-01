@@ -90,7 +90,7 @@ export default function SearchPage() {
     <div>
       <div className="SearchForm">
         <h1>CardVault</h1>
-        <div style={{ display: "flex", gap: "4px", background: "#181b1f", borderRadius: "8px", padding: "4px" }}>
+        <div style={{ display: "flex", gap: "4px", background: "#181b1f", borderRadius: "8px", padding: "4px", flexWrap: "wrap", justifyContent: "center" }}>
           {([
             { key: "nome", label: "Por Nome" },
             { key: "sets", label: "Por Set" },
@@ -172,7 +172,7 @@ export default function SearchPage() {
               <h3 style={{ fontSize: "0.75rem", color: "#6b7280", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "16px", textAlign: "left" }}>
                 {serie}
               </h3>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: "12px" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: "12px" }}>
                 {seriesSets.map(set => (
                   <div
                     key={set.id}

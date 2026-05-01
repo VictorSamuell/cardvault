@@ -105,9 +105,9 @@ export default function CollectionPage() {
 
   return (
     <div>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "24px", marginBottom: "40px" }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "16px", marginBottom: "40px", flexWrap: "wrap" }}>
         <h1 style={{ margin: 0 }}>Minha Coleção</h1>
-        <div style={{ display: "flex", gap: "4px", background: "#181b1f", borderRadius: "8px", padding: "4px" }}>
+        <div style={{ display: "flex", gap: "4px", background: "#181b1f", borderRadius: "8px", padding: "4px", flexWrap: "wrap", justifyContent: "center" }}>
           {(["grid", "stats"] as const).map(v => (
             <button key={v} onClick={() => setView(v)} style={{
               padding: "6px 16px", borderRadius: "6px", border: "none", cursor: "pointer",
@@ -148,7 +148,7 @@ export default function CollectionPage() {
 
       {view === "stats" && (
         <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 20px" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 320px), 1fr))", gap: "16px" }}>
 
             <div style={dashCard}>
               <p style={dashLabel}>Carta mais valiosa</p>

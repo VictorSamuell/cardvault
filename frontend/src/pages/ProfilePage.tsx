@@ -57,7 +57,7 @@ export default function ProfilePage({ username, onBack }: Props) {
       <button onClick={onBack} style={backBtnStyle}>← Voltar</button>
 
       {/* Header do perfil */}
-      <div style={{ display: "flex", alignItems: "flex-start", gap: "32px", marginBottom: "60px", flexWrap: "wrap" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "24px", marginBottom: "40px", flexWrap: "wrap" }}>
         {/* Avatar */}
         <div style={{
           width: "80px", height: "80px", borderRadius: "50%",
@@ -85,7 +85,7 @@ export default function ProfilePage({ username, onBack }: Props) {
           )}
 
           {/* Stats */}
-          <div style={{ display: "flex", gap: "32px", flexWrap: "wrap" }}>
+          <div style={{ display: "flex", gap: "32px", flexWrap: "wrap", marginTop: "16px" }}>
             <div>
               <div style={{ fontSize: "1.2rem", fontWeight: 500, color: "#fff" }}>{collection.length}</div>
               <div style={{ fontSize: "0.75rem", color: "#6b7280", textTransform: "uppercase", letterSpacing: "1px" }}>cartas</div>
