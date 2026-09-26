@@ -1,4 +1,7 @@
+import SetProgress from '../components/SetProgress'
 import { useState } from "react"
+import CollectionEditor from '../components/CollectionEditor'
+import type { Carta } from '../hooks/useCollection'
 import PokemonCard from "../components/PokemonCard"
 import useCollection from "../hooks/useCollection"
 
@@ -32,11 +35,10 @@ function DonutChart({ data }: { data: { label: string; value: number; color: str
   if (total === 0) return null
   const radius = 45
   const circumference = 2 * Math.PI * radius
-  let offset = 0
-  const segments = data.map((d) => {
+  const segments = data.map((d, index) => {
     const dash = (d.value / total) * circumference
+    const offset = data.slice(0, index).reduce((sum, item) => sum + item.value / total * circumference, 0)
     const seg = { ...d, dash, offset }
-    offset += dash
     return seg
   })
   return (
@@ -66,17 +68,39 @@ function DonutChart({ data }: { data: { label: string; value: number; color: str
   )
 }
 
-export default function CollectionPage() {
-  const { collection, removeCard } = useCollection()
-  const [view, setView] = useState<"grid" | "stats">("grid")
+export default function CollectionPage({ onExplore }: { onExplore: () => void }) {
+  const { collection: allCards, removeCard, loading, error, reload, saving } = useCollection()
+  const [list, setList] = useState<'owned' | 'wishlist'>('owned')
+  const [editing, setEditing] = useState<Carta | null>(null)
+  const collection = allCards.filter(c => (c.status ?? 'owned') === list)
+  const [query, setQuery] = useState("")
+  const [setFilter, setSetFilter] = useState("")
+  const [rarityFilter, setRarityFilter] = useState("")
+  const [sort, setSort] = useState("price-desc")
+  const [removing, setRemoving] = useState<string | null>(null)
+  const sets = [...new Set(collection.map(c => c.set).filter(Boolean))].sort() as string[]
+  const rarities = [...new Set(collection.map(c => c.rarity).filter(Boolean))].sort() as string[]
+  const normalize = (value: string) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+  const visible = collection.filter(c => normalize(c.name).includes(normalize(query)) && (!setFilter || c.set === setFilter) && (!rarityFilter || c.rarity === rarityFilter))
+    .sort((a,b) => sort === 'name' ? a.name.localeCompare(b.name, 'pt-BR') : sort === 'price-asc' ? (a.price || 0)-(b.price || 0) : (b.price || 0)-(a.price || 0))
+
+  function exportCollection() {
+    const blob = new Blob([JSON.stringify({ exportedAt: new Date().toISOString(), cards: allCards }, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url; link.download = 'cardvault-colecao.json'; link.click()
+    setTimeout(() => URL.revokeObjectURL(url), 1000)
+  }
+  const [view, setView] = useState<"grid" | "stats" | "sets">("grid")
 
   const cartasOrdenadas = [...collection].sort((a, b) => (b.price || 0) - (a.price || 0))
-  const total = collection.reduce((sum, c) => sum + (c.price || 0), 0)
+  const total = collection.reduce((sum, c) => sum + (c.price || 0) * (c.quantity ?? 1), 0)
   const cartaMaisCara = cartasOrdenadas.find(c => c.price > 0)
   const cartaMaisBarata = [...cartasOrdenadas].reverse().find(c => c.price > 0)
   const semPreco = collection.filter(c => !c.price || c.price === 0).length
   const comPreco = collection.length - semPreco
-  const mediaPreco = comPreco > 0 ? total / comPreco : 0
+  const pricedUnits = collection.reduce((sum,c) => sum + (c.price > 0 ? (c.quantity ?? 1) : 0), 0)
+  const mediaPreco = pricedUnits > 0 ? total / pricedUnits : 0
   const top5 = cartasOrdenadas.filter(c => c.price > 0).slice(0, 5)
 
   const raridadeMap: Record<string, number> = {}
@@ -94,28 +118,24 @@ export default function CollectionPage() {
     { label: "Sem preço", value: semPreco, color: "#374151" },
   ].filter(d => d.value > 0)
 
-  if (collection.length === 0) {
-    return (
-      <div style={{ textAlign: "center", marginTop: "80px", color: "#6b7280" }}>
-        <p style={{ fontSize: "1rem" }}>Sua coleção está vazia.</p>
-        <p style={{ fontSize: "0.85rem", marginTop: "8px" }}>Busque cartas e adicione aqui.</p>
-      </div>
-    )
-  }
+  if (loading) return <section className="vault-state" role="status"><span className="vault-eyebrow">SEU LUGAR</span><h1>Preparando sua coleção…</h1><p>Buscando suas cartas e estatísticas.</p></section>
+  if (error && allCards.length === 0) return <section className="vault-state"><h1>Não conseguimos abrir sua coleção</h1><p>{error}</p><button className="vault-primary" onClick={() => void reload()}>Tentar novamente</button></section>
+  if (allCards.length === 0) return <section className="vault-state"><span className="vault-eyebrow">SEU SONHO COMEÇA AQUI</span><h1>Cada carta conta uma história.</h1><p>Encontre suas cartas favoritas e comece a organizar sua coleção.</p><button className="vault-primary" onClick={onExplore}>Explorar cartas</button></section>
 
   return (
     <div>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "16px", marginBottom: "40px", flexWrap: "wrap" }}>
-        <h1 style={{ margin: 0 }}>Minha Coleção</h1>
+        <div className="vault-heading"><span className="vault-eyebrow">SUA COLEÇÃO PESSOAL</span><h1 style={{ margin: 0 }}>Minha Coleção</h1><p>Organize suas descobertas. Acompanhe cada carta.</p></div>
+        <button className="vault-secondary" onClick={exportCollection}>Exportar coleção</button>
         <div style={{ display: "flex", gap: "4px", background: "#181b1f", borderRadius: "8px", padding: "4px", flexWrap: "wrap", justifyContent: "center" }}>
-          {(["grid", "stats"] as const).map(v => (
+          {(["grid", "stats", "sets"] as const).map(v => (
             <button key={v} onClick={() => setView(v)} style={{
               padding: "6px 16px", borderRadius: "6px", border: "none", cursor: "pointer",
               fontSize: "0.8rem", fontWeight: 500,
               background: view === v ? "#22262a" : "transparent",
               color: view === v ? "#ffffff" : "#6b7280",
             }}>
-              {v === "grid" ? "Cartas" : "Dashboard"}
+              {v === "grid" ? "Cartas" : v === "sets" ? "Completar sets" : "Dashboard"}
             </button>
           ))}
         </div>
@@ -135,17 +155,33 @@ export default function CollectionPage() {
         ))}
       </div>
 
+      <div className="vault-list-tabs"><button className="vault-secondary" aria-pressed={list==='owned'} onClick={()=>{setList('owned');setSetFilter('');setRarityFilter('')}}>Minha coleção ({allCards.filter(c=>c.status!=='wishlist').length})</button><button className="vault-secondary" aria-pressed={list==='wishlist'} onClick={()=>{setList('wishlist');setSetFilter('');setRarityFilter('')}}>Desejos ({allCards.filter(c=>c.status==='wishlist').length})</button></div>
+      <p className="vault-caption">{collection.reduce((sum,c)=>sum+(c.quantity??1),0)} unidades nesta lista · Valor pago informado: {new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(collection.reduce((sum,c)=>sum+(c.purchasePrice??0)*(c.quantity??1),0))}</p>
+      {editing && <CollectionEditor key={editing.id} card={editing} onClose={()=>setEditing(null)} />}
+      <p className="vault-caption">Valores de referência em USD, conforme os dados salvos ao adicionar as cartas. Não representam uma cotação atual ou preço de venda garantido.</p>
+      {view === "grid" && <div className="vault-toolbar">
+        <label>Buscar na coleção<input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Nome da carta…" /></label>
+        <label>Set<select value={setFilter} onChange={e=>setSetFilter(e.target.value)}><option value="">Todos os sets</option>{sets.map(s=><option key={s}>{s}</option>)}</select></label>
+        <label>Raridade<select value={rarityFilter} onChange={e=>setRarityFilter(e.target.value)}><option value="">Todas as raridades</option>{rarities.map(r=><option key={r}>{r}</option>)}</select></label>
+        <label>Ordenar<select value={sort} onChange={e=>setSort(e.target.value)}><option value="price-desc">Maior valor</option><option value="price-asc">Menor valor</option><option value="name">Nome A–Z</option></select></label>
+        <p aria-live="polite">{visible.length} de {collection.length} cartas</p>
+        {(query || setFilter || rarityFilter) && <button className="vault-secondary" onClick={()=>{setQuery('');setSetFilter('');setRarityFilter('')}}>Limpar filtros</button>}
+      </div>}
+      {view === "grid" && visible.length === 0 && <p className="vault-state">Nenhuma carta corresponde aos filtros.</p>}
+      {removing && <div className="vault-confirm" role="alert"><span>Remover {collection.find(c=>c.id===removing)?.name} da coleção?</span><button disabled={saving} onClick={()=>{void removeCard(removing);setRemoving(null)}}>Confirmar remoção</button><button onClick={()=>setRemoving(null)}>Cancelar</button></div>}
       {view === "grid" && (
         <div className="grid">
-          {cartasOrdenadas.map((carta) => (
-            <PokemonCard key={carta.id} id={carta.id} name={carta.name} image={carta.image}
+          {visible.map((carta) => (
+            <div key={carta.id} className="vault-card-entry"><PokemonCard id={carta.id} name={carta.name} image={carta.image}
               price={carta.price} prices={carta.prices} set={carta.set} number={carta.number}
               rarity={carta.rarity} tcgplayerUrl={carta.tcgplayerUrl} updatedAt={carta.updatedAt}
-              onRemove={() => removeCard(carta.id)} inCollection={true} />
+              onRemove={() => setRemoving(carta.id)} inCollection={true} />
+            <div className="vault-card-meta"><span>{carta.quantity ?? 1}× · {carta.language ?? 'Idioma não informado'}</span><button className="vault-secondary" onClick={()=>setEditing(carta)}>Editar carta</button></div></div>
           ))}
         </div>
       )}
 
+      {view === "sets" && <SetProgress />}
       {view === "stats" && (
         <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 20px" }}>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 320px), 1fr))", gap: "16px" }}>

@@ -1,4 +1,5 @@
 import { useState } from "react"
+import type { Carta } from '../hooks/useCollection'
 import CardDetailModal from "./CardDetailModal"
 
 interface Props {
@@ -6,7 +7,7 @@ interface Props {
   name: string
   image: string | null
   price?: number
-  prices?: Record<string, any>
+  prices?: Carta['prices']
   set?: string | null
   number?: string | null
   rarity?: string | null
@@ -15,12 +16,13 @@ interface Props {
   onAdd?: () => void
   onRemove?: () => void
   inCollection?: boolean
+  onWish?: () => void
 }
 
 export default function PokemonCard({
   id, name, image, price = 0, prices = {},
   set, number, rarity, tcgplayerUrl, updatedAt,
-  onAdd, onRemove, inCollection,
+  onAdd, onRemove, inCollection, onWish,
 }: Props) {
   const [showDetail, setShowDetail] = useState(false)
 
@@ -42,7 +44,8 @@ export default function PokemonCard({
             {price > 0 ? `$${price.toFixed(2)}` : "Sem preço"}
           </p>
 
-          <div style={{ display: "flex", gap: "12px", marginTop: "auto" }}>
+          <div style={{ display: "flex", gap: "12px", marginTop: "auto", flexWrap: "wrap" }}>
+            {onWish && !inCollection && <button className="addButton" onClick={e=>{e.stopPropagation();onWish()}}>Desejar</button>}
             {onAdd && !inCollection && (
               <button
                 className="addButton"

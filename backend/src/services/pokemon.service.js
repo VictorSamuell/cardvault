@@ -1,3 +1,6 @@
+import { fetchAllPages } from './catalog-pages.js';
+import { fetchCardCatalog } from './catalog-retry.js';
+import { montarQuery } from './card-query.js';
 const API_URL = "https://api.pokemontcg.io/v2";
 
 function extrairPreco(card) {
@@ -40,39 +43,19 @@ function formatarCarta(card) {
     };
 }
 
-function montarQuery(name) {
-    const temEspaco = name.includes(" ")
-    if (temEspaco) {
-        // Nome com espaço: aspas + wildcard no final
-        // "M Mewtwo" → name:"M Mewtwo*"
-        return `name:"${name}*"`
-    } else {
-        // Nome simples: wildcard livre
-        // "pikachu" → name:pikachu*
-        return `name:${name}*`
-    }
-}
-
 export async function procurarCartas(name) {
     try {
         const query = montarQuery(name)
 
-        const response = await fetch(
-            `${API_URL}/cards?q=${encodeURIComponent(query)}&pageSize=70&orderBy=-tcgplayer.prices.holofoil.market`,
-            {
-                headers: {
-                    // "X-Api-Key": process.env.POKEMONTCG_API_KEY ?? ""
-                }
-            }
-        );
-
-        if (!response.ok) {
-            throw new Error(`Erro na API: Status ${response.status}`);
+        const numericSearch = /^\d+$/.test(name.trim()) || name.includes('/');
+        let cards;
+        if (numericSearch) {
+            cards = await fetchAllPages('cards', { q: query }, url => fetchCardCatalog(url));
+        } else {
+            const response = await fetchCardCatalog(`${API_URL}/cards?q=${encodeURIComponent(query)}&pageSize=70&orderBy=-tcgplayer.prices.holofoil.market`);
+            const data = await response.json();
+            cards = data.data ?? [];
         }
-
-        const data = await response.json();
-        const cards = data.data ?? [];
-
         const cartas = cards
             .filter(card => card.images?.large || card.images?.small)
             .map(formatarCarta);

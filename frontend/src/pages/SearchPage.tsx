@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react"
-import { buscarCartas } from "../services/cards.service"
+import { useState, useEffect, useRef } from "react"
+import { buscarCartas, fetchCatalog } from "../services/cards.service"
 import PokemonCard from "../components/PokemonCard"
-import useCollection from "../hooks/useCollection"
+import useCollection, { type Carta } from "../hooks/useCollection"
 
-const API_URL = "https://cardvault-backend-plgs.onrender.com/api"
+
 
 interface SetInfo {
   id: string
@@ -19,7 +19,7 @@ export default function SearchPage() {
   const [aba, setAba] = useState<"nome" | "sets" | "set-cards">("nome")
 
   const [name, setName] = useState("")
-  const [cartas, setCartas] = useState<any[]>([])
+  const [cartas, setCartas] = useState<Carta[]>([])
   const [loading, setLoading] = useState(false)
   const [searched, setSearched] = useState(false)
 
@@ -27,52 +27,51 @@ export default function SearchPage() {
   const [setsLoading, setSetsLoading] = useState(false)
   const [setsSearch, setSetsSearch] = useState("")
   const [selectedSet, setSelectedSet] = useState<SetInfo | null>(null)
-  const [setCards, setSetCards] = useState<any[]>([])
+  const [setCards, setSetCards] = useState<Carta[]>([])
   const [setCardsLoading, setSetCardsLoading] = useState(false)
 
   const { addCard, collection } = useCollection()
   const collectionIds = new Set(collection.map(c => c.id))
 
-  useEffect(() => {
-    if (aba === "sets" && sets.length === 0) {
-      setSetsLoading(true)
-      fetch(`${API_URL}/sets`)
-        .then(r => r.json())
-        .then(data => setSets(Array.isArray(data) ? data : []))
-        .catch(err => console.error("Erro sets:", err))
-        .finally(() => setSetsLoading(false))
-    }
-  }, [aba])
-
-  async function handleSearch() {
-    if (!name.trim()) return
-    try {
-      setLoading(true)
-      setSearched(false)
-      const resultado = await buscarCartas(name)
-      setCartas(resultado)
-    } catch (error) {
-      console.error("Erro ao buscar cartas", error)
-      setCartas([])
-    } finally {
-      setLoading(false)
-      setSearched(true)
-    }
+  const [searchError, setSearchError] = useState('')
+  const [setsError, setSetsError] = useState('')
+  const [cardsError, setCardsError] = useState('')
+  const [submittedName, setSubmittedName] = useState('')
+  const active = useRef<AbortController | null>(null)
+  useEffect(() => () => active.current?.abort(), [])
+  function beginRequest() {
+    active.current?.abort()
+    const controller = new AbortController()
+    active.current = controller
+    return controller
   }
-
+  function changeTab(tab: 'nome' | 'sets') {
+    active.current?.abort()
+    setLoading(false); setSetsLoading(false); setSetCardsLoading(false)
+    setAba(tab)
+    if (tab === 'sets' && sets.length === 0) void loadSets()
+  }
+  async function loadSets() {
+    const controller = beginRequest()
+    setSetsLoading(true); setSetsError('')
+    try { setSets(await fetchCatalog<SetInfo>('/sets', controller.signal)) }
+    catch (error) { if (!controller.signal.aborted) setSetsError(error instanceof Error ? error.message : 'Não foi possível carregar os sets.') }
+    finally { if (!controller.signal.aborted) setSetsLoading(false) }
+  }
+  async function handleSearch(term = name.trim()) {
+    if (!term) return
+    const controller = beginRequest()
+    setLoading(true); setSearched(false); setSearchError(''); setCartas([]); setSubmittedName(term)
+    try { setCartas(await buscarCartas<Carta>(term, controller.signal)); setSearched(true) }
+    catch (error) { if (!controller.signal.aborted) setSearchError(error instanceof Error ? error.message : 'Não foi possível carregar as cartas.') }
+    finally { if (!controller.signal.aborted) setLoading(false) }
+  }
   async function handleSelectSet(set: SetInfo) {
-    setSelectedSet(set)
-    setAba("set-cards")
-    setSetCardsLoading(true)
-    try {
-      const res = await fetch(`${API_URL}/sets/${set.id}/cards`)
-      const data = await res.json()
-      setSetCards(Array.isArray(data) ? data : [])
-    } catch (err) {
-      console.error("Erro ao buscar cartas do set:", err)
-    } finally {
-      setSetCardsLoading(false)
-    }
+    const controller = beginRequest()
+    setSelectedSet(set); setAba('set-cards'); setSetCards([]); setCardsError(''); setSetCardsLoading(true)
+    try { setSetCards(await fetchCatalog<Carta>(`/sets/${encodeURIComponent(set.id)}/cards`, controller.signal)) }
+    catch (error) { if (!controller.signal.aborted) setCardsError(error instanceof Error ? error.message : 'Não foi possível carregar as cartas deste set.') }
+    finally { if (!controller.signal.aborted) setSetCardsLoading(false) }
   }
 
   const setsFiltrados = sets.filter(s =>
@@ -92,12 +91,12 @@ export default function SearchPage() {
         <h1>CardVault</h1>
         <div style={{ display: "flex", gap: "4px", background: "#181b1f", borderRadius: "8px", padding: "4px", flexWrap: "wrap", justifyContent: "center" }}>
           {([
-            { key: "nome", label: "Por Nome" },
+            { key: "nome", label: "Nome ou número" },
             { key: "sets", label: "Por Set" },
           ] as const).map(({ key, label }) => (
             <button
               key={key}
-              onClick={() => setAba(key)}
+              onClick={() => changeTab(key)}
               style={{
                 padding: "6px 20px", borderRadius: "6px", border: "none", cursor: "pointer",
                 fontSize: "0.8rem", fontWeight: 500,
@@ -117,9 +116,10 @@ export default function SearchPage() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-              placeholder="Digite o nome de um Pokémon"
+              aria-label="Nome ou número da carta" placeholder="Charizard, 135 ou 136/135"
             />
-            <button className="SearchButton" onClick={handleSearch} disabled={loading}>
+            <p className="vault-caption">Use 135 para cartas nº 135 de qualquer set, ou 136/135 para incluir o total impresso. Também pode combinar: Charizard 136/135.</p>
+            <button className="SearchButton" onClick={() => void handleSearch()} disabled={loading}>
               {loading ? "Buscando..." : "Buscar"}
             </button>
           </>
@@ -138,8 +138,10 @@ export default function SearchPage() {
       {/* ABA: Por Nome */}
       {aba === "nome" && (
         <>
-          {searched && !loading && cartas.length === 0 && (
-            <p style={{ color: "#6b7280", marginTop: "40px" }}>Nenhuma carta encontrada para "{name}".</p>
+          {loading && <p role="status">Buscando cartas… A primeira consulta pode levar até um minuto.</p>}
+          {searchError && <CatalogError message={searchError} retry={() => void handleSearch(submittedName)} />}
+          {searched && !loading && !searchError && cartas.length === 0 && (
+            <p style={{ color: "#6b7280", marginTop: "40px" }}>Nenhuma carta encontrada para "{submittedName}".</p>
           )}
           {!loading && cartas.length > 0 && (
             <p style={{ color: "#6b7280", fontSize: "0.85rem", marginBottom: "24px" }}>
@@ -152,7 +154,7 @@ export default function SearchPage() {
                 key={carta.id} id={carta.id} name={carta.name} image={carta.image}
                 price={carta.price} prices={carta.prices} set={carta.set}
                 number={carta.number} rarity={carta.rarity} tcgplayerUrl={carta.tcgplayerUrl}
-                updatedAt={carta.updatedAt} onAdd={() => addCard(carta)}
+                updatedAt={carta.updatedAt} onAdd={() => addCard(carta)} onWish={() => addCard({...carta,status:'wishlist'})}
                 inCollection={collectionIds.has(carta.id)}
               />
             ))}
@@ -164,8 +166,9 @@ export default function SearchPage() {
       {aba === "sets" && (
         <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 20px" }}>
           {setsLoading && <p style={{ color: "#6b7280", marginTop: "40px" }}>Carregando sets...</p>}
-          {!setsLoading && sets.length === 0 && (
-            <p style={{ color: "#ef4444", marginTop: "40px" }}>Erro ao carregar sets. Verifique se o backend está rodando.</p>
+          {setsError && <CatalogError message={setsError} retry={() => void loadSets()} />}
+          {!setsLoading && !setsError && sets.length === 0 && (
+            <p style={{ color: "#ef4444", marginTop: "40px" }}>Nenhum set disponível no catálogo.</p>
           )}
           {!setsLoading && Object.entries(setsPorSerie).map(([serie, seriesSets]) => (
             <div key={serie} style={{ marginBottom: "40px" }}>
@@ -208,7 +211,7 @@ export default function SearchPage() {
         <>
           <div style={{ maxWidth: "1200px", margin: "0 auto 32px", padding: "0 20px", textAlign: "left" }}>
             <button
-              onClick={() => setAba("sets")}
+              onClick={() => changeTab("sets")}
               style={{ background: "none", border: "none", color: "#6b7280", cursor: "pointer", fontSize: "0.85rem", padding: 0, marginBottom: "16px" }}
             >
               ← Voltar para sets
@@ -226,7 +229,9 @@ export default function SearchPage() {
             </div>
           </div>
 
-          {setCardsLoading && <p style={{ color: "#6b7280" }}>Carregando cartas...</p>}
+          {cardsError && <CatalogError message={cardsError} retry={() => void handleSelectSet(selectedSet)} />}
+          {!setCardsLoading && !cardsError && setCards.length === 0 && <p>Nenhuma carta disponível neste set.</p>}
+          {setCardsLoading && <p role="status" style={{ color: "#6b7280" }}>Carregando cartas… A consulta pode levar até um minuto.</p>}
           {!setCardsLoading && setCards.length > 0 && (
             <p style={{ color: "#6b7280", fontSize: "0.85rem", marginBottom: "24px" }}>
               {setCards.length} cartas
@@ -239,7 +244,7 @@ export default function SearchPage() {
                 key={carta.id} id={carta.id} name={carta.name} image={carta.image}
                 price={carta.price} prices={carta.prices} set={carta.set}
                 number={carta.number} rarity={carta.rarity} tcgplayerUrl={carta.tcgplayerUrl}
-                updatedAt={carta.updatedAt} onAdd={() => addCard(carta)}
+                updatedAt={carta.updatedAt} onAdd={() => addCard(carta)} onWish={() => addCard({...carta,status:'wishlist'})}
                 inCollection={collectionIds.has(carta.id)}
               />
             ))}
@@ -248,4 +253,7 @@ export default function SearchPage() {
       )}
     </div>
   )
+}
+function CatalogError({ message, retry }: { message: string; retry: () => void }) {
+  return <div className="collection-notice" role="alert"><p>{message}</p><button className="vault-secondary" onClick={retry}>Tentar novamente</button></div>
 }

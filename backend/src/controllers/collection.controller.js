@@ -1,4 +1,20 @@
 import Collection from "../models/collection.model.js"
+import { validateMetadata } from '../services/collection-metadata.js'
+
+export async function updateCard(req, res) {
+  let fields
+  try { fields = validateMetadata(req.body) }
+  catch (error) { return res.status(400).json({ error: error.message }) }
+  try {
+    const updates = Object.fromEntries(Object.entries(fields).map(([key, value]) => [`cards.$.${key}`, value]))
+    const col = await Collection.findOneAndUpdate(
+      { userId: req.userId, 'cards.id': req.params.cardId },
+      { $set: updates }, { new: true, runValidators: true },
+    )
+    if (!col) return res.status(404).json({ error: 'Carta não encontrada na sua coleção.' })
+    return res.json({ cards: col.cards })
+  } catch { return res.status(500).json({ error: 'Não foi possível atualizar a carta.' }) }
+}
 
 // Busca a coleção do usuário logado
 export async function getCollection(req, res) {
@@ -18,6 +34,10 @@ export async function addCard(req, res) {
   if (!carta?.id || !carta?.name) {
     return res.status(400).json({ error: "Dados da carta inválidos." })
   }
+  try {
+    const metadata = Object.fromEntries(['quantity', 'condition', 'language', 'purchasePrice', 'status', 'notes'].filter(key => carta[key] !== undefined).map(key => [key, carta[key]]))
+    if (Object.keys(metadata).length) validateMetadata(metadata)
+  } catch (error) { return res.status(400).json({ error: error.message }) }
 
   try {
     let col = await Collection.findOne({ userId: req.userId })

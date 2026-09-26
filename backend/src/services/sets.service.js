@@ -1,15 +1,12 @@
-const API_URL = "https://api.pokemontcg.io/v2"
+import { createCatalogCache } from './catalog-cache.js'
+import { fetchCardCatalog } from './catalog-retry.js'
+const cached = createCatalogCache()
+import { fetchAllPages } from './catalog-pages.js'
 
 export async function buscarSets() {
-  const response = await fetch(
-    `${API_URL}/sets?orderBy=-releaseDate&pageSize=250`
-  )
+  const items = await cached('sets', () => fetchAllPages('sets', { orderBy: '-releaseDate' }, url => fetchCardCatalog(url)))
 
-  if (!response.ok) throw new Error(`Erro na API: ${response.status}`)
-
-  const data = await response.json()
-
-  return data.data.map(set => ({
+  return items.map(set => ({
     id: set.id,
     name: set.name,
     series: set.series,
@@ -21,16 +18,10 @@ export async function buscarSets() {
 }
 
 export async function buscarCartasPorSet(setId) {
-  const response = await fetch(
-    `${API_URL}/cards?q=set.id:${encodeURIComponent(setId)}&pageSize=250&orderBy=number`
-  )
+  const items = await cached('set:' + setId, () => fetchAllPages('cards', { q: 'set.id:' + setId, orderBy: 'number' }, url => fetchCardCatalog(url)))
 
-  if (!response.ok) throw new Error(`Erro na API: ${response.status}`)
+  return items
 
-  const data = await response.json()
-
-  return data.data
-    .filter(card => card.images?.large || card.images?.small)
     .map(card => {
       const prices = card?.tcgplayer?.prices ?? {}
       const ordem = ["holofoil", "normal", "reverseHolofoil", "1stEditionHolofoil"]

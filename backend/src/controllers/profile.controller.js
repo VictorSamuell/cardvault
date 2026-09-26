@@ -23,7 +23,7 @@ export const getProfile = async (req, res) => {
       const col = await Collection.findOne({ userId: user._id })
       // Mapeia o campo 'image' para 'imageUrl' para consistência com o frontend
       if (col?.cards) {
-        collection = col.cards.map((c) => ({
+        collection = col.cards.filter(c => c.status !== 'wishlist').map((c) => ({
           id: c.id,
           name: c.name,
           imageUrl: c.image,

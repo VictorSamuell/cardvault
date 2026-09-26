@@ -15,3 +15,11 @@ Thumbs.db
 .idea
 frontend/dist/
 frontend/build/
+
+# Configurações privadas de qualquer ambiente
+.env.*
+
+# Arquivos gerados por ferramentas locais
+*.tsbuildinfo
+coverage/
+.vercel/

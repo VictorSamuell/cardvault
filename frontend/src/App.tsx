@@ -9,18 +9,24 @@ import ProfilePage from "./pages/ProfilePage.tsx"
 import SearchProfilesPage from "./pages/SearchProfilesPage.tsx"
 import SettingsPage from "./pages/SettingsPage.tsx"
 import "./App.css"
+import CollectionProvider from "./components/CollectionProvider"
 
 type Page = "search" | "collection" | "profiles" | "profile" | "settings"
 
 function App() {
   const { user, loading, logout } = useAuth()
-  const { collection } = useCollection()
+  if (loading) return <p role="status">Carregando sua conta…</p>
+  if (!user) return <AuthPage />
+  return <CollectionProvider><AuthenticatedApp user={user} logout={logout} /></CollectionProvider>
+}
+
+function AuthenticatedApp({ user, logout }: { user: NonNullable<ReturnType<typeof useAuth>['user']>; logout: () => void }) {
+  const { collection, error, saving } = useCollection()
   const [page, setPage] = useState<Page>("search")
   const [viewingUsername, setViewingUsername] = useState("")
   const [menuOpen, setMenuOpen] = useState(false)
 
-  if (loading) return null
-  if (!user) return <AuthPage />
+
 
   const goToProfile = (username: string) => {
     setViewingUsername(username)
@@ -161,9 +167,11 @@ function App() {
         </div>
       </div>
 
+      {error && <div className="collection-notice" role="alert">{error}</div>}
+      {saving && <div className="collection-notice" role="status">Salvando sua coleção…</div>}
       {/* ── PÁGINAS ── */}
       {page === "search" && <SearchPage />}
-      {page === "collection" && <CollectionPage />}
+      {page === "collection" && <CollectionPage onExplore={() => navigate("search")} />}
       {page === "profiles" && <SearchProfilesPage onViewProfile={goToProfile} />}
       {page === "profile" && <ProfilePage username={viewingUsername} onBack={() => setPage("profiles")} />}
       {page === "settings" && <SettingsPage onBack={() => setPage("search")} />}
